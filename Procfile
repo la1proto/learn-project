@@ -1,2 +1,2 @@
-web: python3 -m http.server $PORT
+web: python3 srv.py
 
