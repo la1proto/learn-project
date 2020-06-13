@@ -9,6 +9,24 @@ now = datetime.now().year
 PORT = int(os.getenv("PORT", 8000))
 print(f"PORT = {PORT}")
 
+def message_bye(hour):
+    if hour < 6:
+        return "GoodNight.."
+    elif hour < 12:
+        return "GoodMorning.."
+    elif hour < 18:
+        return "Good Day.."
+    elif hour < 23:
+        return "Good Evening.."
+    else:
+        return "GoodNight.."
+
+def page_goodbye(qs):
+    return f"""
+        {bye(datetime.today().hour)}
+        time: {datetime.today()}
+            """
+
 def get_n(qs):
     if qs == "":
         return "anonymouse"
@@ -30,20 +48,31 @@ def get_y(qs):
             today = datetime.today().year
             return str(today - int(qs["age"][0]))
 
+def page(query):
+    path, qs = query.split("?") if '?' in query else [query,""]
+    path = path.rstrip('/')
+
+    switcher = {
+        "/hello": page_hello,
+        "/goodbye": page_goodbye,
+    }
+
+    return switcher[path](qs) if path in switcher else "X3 page"
+
+def page_hello(qs):
+    qs = parse_qs(qs) if qs != "" else ""
+    name = get_n(qs)
+    year = get_y(qs)
+    return f"""
+                    Hi {name}! 
+                    You were born in {year}.
+                """
 
 class MyHandler(SimpleHTTPRequestHandler):
     def do_GET(self):
-            if self.path.startswith("/hello"):
-                path, qs = self.path.split("?") if "?" in self.path else [self.path,""]
+            if self.path != "":
+                msg = page(self.path)
 
-                name = get_n(qs)
-                year = get_y(qs)
-
-                msg = f"""
-                hello {name}!
-                You were born in {year}
-                Your path:  {self.path}
-            """
                 self.send_response(200)
                 self.send_header("Content-type", "text/plain")
                 self.send_header("Content-length", str(len(msg)))
