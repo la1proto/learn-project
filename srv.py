@@ -3,8 +3,16 @@ import socketserver
 from http.server import SimpleHTTPRequestHandler
 from urllib.parse import parse_qs
 from datetime import datetime
+from pathlib import Path
 
 now = datetime.now().year
+
+PROJECT_DIR = Path(__file__).parent.parent.resolve()
+print(f"PROJECT_DIR = {PROJECT_DIR}")
+
+class NotFound(Exception):
+    pass
+
 
 PORT = int(os.getenv("PORT", 8000))
 print(f"PORT = {PORT}")
@@ -50,12 +58,22 @@ def page_hello(qs):
     hi {name}
     you were born in {year}
     """
-
+def page_p(self):
+    html = TEMPLATES_DIR / "resume" / "index.html"
+    contents = self.get_file_contents(html)
+    self.respond(contents, "text/html")
+def get_file_contents(self, fp: Path) -> str:
+	if not fp.is_file():
+		raise NotFound()
+    with fp.open("r") as src:
+        ct = src.read()
+    return ct
+ 
 class MyHandler(SimpleHTTPRequestHandler):
     def do_GET(self):
         path, qs = self.path.split("?") if '?' in self.path else [self.path, ""]
         path = path.rstrip('/')
-        switcher = {"/hello": page_hello, "/goodbye": page_goodbye}
+        switcher = {"/hello": page_hello, "/goodbye": page_goodbye , "/resume": page_p}
         if path in switcher:
             msg = switcher[path](qs)
 
