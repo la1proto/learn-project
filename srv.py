@@ -63,8 +63,8 @@ def page_p(self):
     contents = self.get_file_contents(html)
     self.respond(contents, "text/html")
 def get_file_contents(self, fp: Path) -> str:
-	if not fp.is_file():
-		raise NotFound()
+    if not fp.is_file():
+         raise NotFound()
     with fp.open("r") as src:
         ct = src.read()
     return ct
